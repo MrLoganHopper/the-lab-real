@@ -6,6 +6,11 @@ export const OPEN_HOUR = 10;
 export const CLOSE_HOUR = 20;
 export const VALID_DURATIONS = [1, 2, 3];
 
+function isActiveReservation(status) {
+  const normalized = String(status || '').trim().toLowerCase();
+  return normalized === 'confirmed' || normalized === 'active';
+}
+
 export function dateForEvent(fixedDate = '', now = DateTime.now()) {
   if (fixedDate) {
     const requested = DateTime.fromISO(fixedDate, { zone: ZONE });
@@ -38,7 +43,7 @@ export function validateBooking({ date, startHour, durationHours, name, email },
 export function occupiedByHour(bookings = []) {
   const hours = Array.from({ length: CLOSE_HOUR - OPEN_HOUR }, (_, i) => ({ hour: OPEN_HOUR + i, booked: 0 }));
   for (const b of bookings) {
-    if (b.status !== 'confirmed') continue;
+    if (!isActiveReservation(b.status)) continue;
     for (let h = b.start_hour; h < b.start_hour + b.duration_hours; h++) {
       if (h >= OPEN_HOUR && h < CLOSE_HOUR) hours[h - OPEN_HOUR].booked += 1;
     }

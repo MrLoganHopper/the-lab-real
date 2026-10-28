@@ -26,6 +26,16 @@ test('checks every hour of overlapping reservations',()=>{
   assert.equal(canReserve(counts,14,2),false);
   assert.equal(canReserve(counts,15,3),true);
 });
+test('counts active reservations as occupied capacity',()=>{
+  const counts = occupiedByHour([
+    { status:'active', start_hour:13, duration_hours:2 },
+    { status:'confirmed', start_hour:14, duration_hours:1 },
+    { status:'cancelled', start_hour:13, duration_hours:2 }
+  ]);
+  assert.equal(counts.find(x=>x.hour===13).booked,1);
+  assert.equal(counts.find(x=>x.hour===14).booked,2);
+  assert.equal(counts.find(x=>x.hour===15).booked,0);
+});
 test('Google Calendar URL encodes daylight saving Pacific time',()=>{
   const url=new URL(googleCalendarUrl('2026-10-29',14,2));
   assert.equal(url.hostname,'calendar.google.com');
